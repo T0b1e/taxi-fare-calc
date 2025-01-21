@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>⚠️กันโกงมิเตอร์แท็กซี่⚠️</title>
+
+  <!-- ใช้ฟอนต์ Prompt -->
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" 
+    rel="stylesheet"
+  />
+
+  <style>
+    /* รีเซ็ตสไตล์ขั้นต้น */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #fafafa; /* พื้นหลังสว่าง เน้นความมินิมอล */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #444; /* สีข้อความกลาง ๆ */
+      padding: 1rem;
+    }
+
+    /* กล่องรวมข้อมูลด้านบน */
+    .top-info {
+      width: 100%;
+      max-width: 480px;
+      background-color: #fff; 
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1rem;
+      padding: 1.5rem; 
+    }
+
+    .title {
+      text-align: center;
+      font-size: 2rem; 
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .metrics {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .metric-item {
+      text-align: center;
+      margin: 0.5rem;
+    }
+    .metric-label {
+      font-size: 1.2rem; 
+      margin-bottom: 0.3rem;
+      font-weight: 500;
+      color: #555;
+    }
+    .metric-value {
+      font-size: 1.6rem; 
+      font-weight: 600;
+      color: #007BFF;
+    }
+
+    /* ปุ่มวงกลมตรงกลาง (ขยาย 2 เท่า) */
+    .circle-button {
+      width: 400px;
+      height: 400px;
+      background-color: #333;
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 1.4rem; 
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: background 0.3s, transform 0.1s;
+      user-select: none;
+    }
+    .circle-button:hover {
+      background-color: #555;
+    }
+    .circle-button:active {
+      transform: scale(0.98);
+    }
+
+    /* ข้อความสถานะด้านล่าง */
+    .status {
+      margin-top: 1rem;
+      font-size: 1.2rem; 
+      color: #444;
+      min-height: 1.2rem; 
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    /* Responsive เบื้องต้น */
+    @media (max-width: 500px) {
+      .title {
+        font-size: 1.6rem;
+      }
+      /* ปรับปุ่มเหลือ 2 เท่าในหน้าจอเล็ก (จาก 160 -> 320) */
+      .circle-button {
+        width: 320px;
+        height: 320px;
+        font-size: 1.2rem;
+      }
+      .metric-label {
+        font-size: 1rem;
+      }
+      .metric-value {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ส่วนแสดงข้อมูลต่างๆ ด้านบน -->
+  <div class="top-info">
+    <div class="title">⚠️กันโกงมิเตอร์แท็กซี่⚠️</div>
+    <div class="metrics">
+      <!-- ระยะทาง -->
+      <div class="metric-item">
+        <div class="metric-label">ระยะทาง (กม.)</div>
+        <div class="metric-value" id="distance">0.00</div>
+      </div>
+      <!-- ความเร็ว -->
+      <div class="metric-item">
+        <div class="metric-label">ความเร็ว (กม./ชม.)</div>
+        <div class="metric-value" id="speed">0.00</div>
+      </div>
+      <!-- เวลารถติด -->
+      <div class="metric-item">
+        <div class="metric-label">รถติด (นาที)</div>
+        <div class="metric-value" id="jamTime">0.00</div>
+      </div>
+      <!-- ค่าโดยสาร -->
+      <div class="metric-item">
+        <div class="metric-label">ค่าโดยสาร (บาท)</div>
+        <div class="metric-value" id="fare">0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ปุ่มวงกลมตรงกลาง -->
+  <button class="circle-button" id="meterButton">เริ่ม</button>
+
+  <!-- ข้อความสถานะหรือข้อผิดพลาด -->
+  <div class="status" id="status"></div>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6418968426155622"
+  crossorigin="anonymous"></script>
+
+  <script>
+    // --------------------------------------------
+    // ตัวแปรที่ใช้ควบคุมสถานะ
+    // --------------------------------------------
+    let watchID = null;
+    let previousPosition = null;
+    let lastTimestamp = null;
+    let totalDistance = 0.0; // กม.
+    let totalJamTime = 0.0;  // นาที
+    let currentFare = 0.0;   // บาท
+    let currentSpeed = 0.0;  // กม./ชม.
+
+    // กำหนด Threshold ความเร็ว (ถ้าต่ำกว่านี้ ถือว่ารถติด)
+    const TRAFFIC_SPEED_THRESHOLD = 6.0;
+
+    // สถานะ Meter: 'STOPPED', 'RUNNING', 'PAUSED'
+    let meterState = 'STOPPED';
+
+    // สำหรับตรวจจับการกดค้าง
+    let pressTimer = null;
+    const LONG_PRESS_DURATION = 600; // ms
+
+    // --------------------------------------------
+    // ฟังก์ชันคำนวณค่าแท็กซี่โดยคร่าว ๆ
+    // --------------------------------------------
+    function computeThaiTaxiFare(distanceKm, jamMinutes) {
+      let fare = 35; // เริ่มต้นที่ 35
+      let remain = distanceKm;
+
+      // หักไป 1 กม. แรก (35 บาท)
+      if (remain <= 1) {
+        remain = 0;
+      } else {
+        remain -= 1;
+      }
+
+      // 1-10 กม. => 5.50 บาท/กม.
+      if (remain > 0) {
+        let segment = Math.min(remain, 9);
+        fare += segment * 5.50;
+        remain -= segment;
+      }
+
+      // 10-20 กม. => 6.50 บาท/กม.
+      if (remain > 0) {
+        let segment = Math.min(remain, 10);
+        fare += segment * 6.50;
+        remain -= segment;
+      }
+
+      // 20-40 กม. => 7.50 บาท/กม.
+      if (remain > 0) {
+        let segment = Math.min(remain, 20);
+        fare += segment * 7.50;
+        remain -= segment;
+      }
+
+      // 40-60 กม. => 8.00 บาท/กม.
+      if (remain > 0) {
+        let segment = Math.min(remain, 20);
+        fare += segment * 8.00;
+        remain -= segment;
+      }
+
+      // 60-80 กม. => 9.00 บาท/กม.
+      if (remain > 0) {
+        let segment = Math.min(remain, 20);
+        fare += segment * 9.00;
+        remain -= segment;
+      }
+
+      // เกิน 80 กม. => 10.50 บาท/กม.
+      if (remain > 0) {
+        fare += remain * 10.50;
+      }
+
+      // รถติด => 1.25 บาท/นาที
+      fare += jamMinutes * 1.25;
+
+      return fare;
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันคำนวณระยะทาง (Haversine)
+    // --------------------------------------------
+    function toRad(value) {
+      return (value * Math.PI) / 180;
+    }
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // รัศมีโลก (km)
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // --------------------------------------------
+    // Handle ตำแหน่ง
+    // --------------------------------------------
+    function handlePosition(pos) {
+      if (meterState !== 'RUNNING') return;
+
+      const { latitude, longitude } = pos.coords;
+      const currentTimestamp = pos.timestamp;
+
+      if (previousPosition && lastTimestamp) {
+        const dist = haversineDistance(
+          previousPosition.lat,
+          previousPosition.lon,
+          latitude,
+          longitude
+        );
+        totalDistance += dist;
+
+        const timeDiffMs = currentTimestamp - lastTimestamp;
+        const timeDiffMin = timeDiffMs / 60000.0;
+
+        currentSpeed = dist / (timeDiffMin / 60);
+
+        if (currentSpeed < TRAFFIC_SPEED_THRESHOLD) {
+          totalJamTime += timeDiffMin;
+        }
+
+        currentFare = computeThaiTaxiFare(totalDistance, totalJamTime);
+        updateDisplay();
+      }
+      previousPosition = { lat: latitude, lon: longitude };
+      lastTimestamp = currentTimestamp;
+    }
+
+    // --------------------------------------------
+    // Handle Error
+    // --------------------------------------------
+    function handleError(err) {
+      document.getElementById('status').textContent = "เอ๊ะ..พิกัดไม่ทำงาน: " + err.message;
+      console.log(err);
+    }
+
+    // --------------------------------------------
+    // อัปเดตตัวเลขบนหน้าจอ
+    // --------------------------------------------
+    function updateDisplay() {
+      document.getElementById('distance').textContent = totalDistance.toFixed(2);
+      document.getElementById('speed').textContent = currentSpeed.toFixed(2);
+      document.getElementById('jamTime').textContent = totalJamTime.toFixed(2);
+      document.getElementById('fare').textContent = currentFare.toFixed(2);
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันเริ่มต้น (Start)
+    // --------------------------------------------
+    function startMeter() {
+      totalDistance = 0.0;
+      totalJamTime = 0.0;
+      currentSpeed = 0.0;
+      currentFare = 35.0;
+      previousPosition = null;
+      lastTimestamp = null;
+      updateDisplay();
+
+      document.getElementById('status').textContent = "เริ่มวัดระยะแล้ว...";
+      meterState = 'RUNNING';
+
+      watchID = navigator.geolocation.watchPosition(
+        handlePosition,
+        handleError,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันหยุดชั่วคราว (Pause)
+    // --------------------------------------------
+    function pauseMeter() {
+      meterState = 'PAUSED';
+      document.getElementById('status').textContent = "หยุดชั่วคราวนะ";
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันหยุดการทำงาน (Stop)
+    // --------------------------------------------
+    function stopMeter() {
+      if (watchID) {
+        navigator.geolocation.clearWatch(watchID);
+        watchID = null;
+      }
+      meterState = 'STOPPED';
+      document.getElementById('status').textContent = "หยุดแล้วจ้า";
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันรีเซ็ต (Reset)
+    // --------------------------------------------
+    function resetMeter() {
+      stopMeter();
+      document.getElementById('meterButton').textContent = "เริ่ม";
+      document.getElementById('status').textContent = "รีเซ็ตเรียบร้อยจ้า คลิกเพื่อเริ่มใหม่";
+      updateDisplay();
+    }
+
+    // --------------------------------------------
+    // จัดการการคลิกตามเงื่อนไขที่ต้องการ
+    // --------------------------------------------
+    const meterButton = document.getElementById('meterButton');
+
+    meterButton.addEventListener('mousedown', () => {
+      // ตั้งเวลาไว้ ถ้ากดค้างเกิน LONG_PRESS_DURATION => stopMeter()
+      pressTimer = setTimeout(() => {
+        if (meterState === 'RUNNING' || meterState === 'PAUSED') {
+          stopMeter();
+          meterButton.textContent = "รีเซ็ต";
+        }
+      }, LONG_PRESS_DURATION);
+    });
+
+    meterButton.addEventListener('mouseup', () => {
+      clearTimeout(pressTimer);
+
+      if (meterState === 'STOPPED') {
+        if (meterButton.textContent === "รีเซ็ต") {
+          resetMeter();
+        } else {
+          startMeter();
+          meterButton.textContent = "หยุดชั่วคราว";
+        }
+      } 
+      else if (meterState === 'RUNNING') {
+        pauseMeter();
+        meterButton.textContent = "เริ่มต่อ";
+      }
+      else if (meterState === 'PAUSED') {
+        meterState = 'RUNNING';
+        document.getElementById('status').textContent = "วิ่งต่อแล้วนะ";
+        meterButton.textContent = "หยุดชั่วคราว";
+      }
+    });
+
+    meterButton.addEventListener('mouseleave', () => {
+      clearTimeout(pressTimer);
+    });
+
+    window.addEventListener('load', () => {
+      if (!('geolocation' in navigator)) {
+        alert("บราวเซอร์ไม่ซัพพอร์ต geolocation จ้า");
+      }
+    });
+  </script>
+</body>
+</html>
