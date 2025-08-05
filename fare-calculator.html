@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>⚠️กันโกงมิเตอร์แท็กซี่⚠️</title>
 
   <!-- ใช้ฟอนต์ Prompt -->
-  <link 
-    href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" 
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet" />
 
   <style>
     /* รีเซ็ตสไตล์ขั้นต้น */
@@ -18,14 +16,15 @@
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Prompt', sans-serif;
-      background-color: #fafafa; /* พื้นหลังสว่าง เน้นความมินิมอล */
+      background-color: #fafafa;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      color: #444; /* สีข้อความกลาง ๆ */
+      color: #444;
       padding: 1rem;
     }
 
@@ -33,43 +32,177 @@
     .top-info {
       width: 100%;
       max-width: 480px;
-      background-color: #fff; 
+      background-color: #fff;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       margin-bottom: 1rem;
-      padding: 1.5rem; 
+      padding: 1.5rem;
     }
 
     .title {
       text-align: center;
-      font-size: 2rem; 
+      font-size: 2rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
 
     .metrics {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .metrics-row {
+      display: flex;
       justify-content: space-around;
       align-items: center;
+      width: 100%;
+      flex-wrap: wrap;
     }
+
+    .fare-row {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
     .metric-item {
       text-align: center;
-      margin: 0.5rem;
+      margin: 0.3rem;
     }
+
+    .metric-item.fare-item {
+      margin: 0;
+    }
+
+    .metric-item.small-item {
+      flex: 1;
+      min-width: 100px;
+    }
+
     .metric-label {
-      font-size: 1.2rem; 
+      font-size: 1.2rem;
       margin-bottom: 0.3rem;
       font-weight: 500;
       color: #555;
     }
+
     .metric-value {
-      font-size: 1.6rem; 
+      font-size: 1.6rem;
       font-weight: 600;
-      color: #007BFF;
+      color: #ff0000;
     }
 
-    /* ปุ่มวงกลมตรงกลาง (ขยาย 2 เท่า) */
+    /* 7-Segment Display Styles */
+    .seven-segment-container {
+      background: #000;
+      padding: 15px 20px;
+      border-radius: 12px;
+      border: 3px solid #333;
+      box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.15);
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    .seven-segment-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 3rem;
+      font-weight: bold;
+      color: #ff0000;
+      text-shadow: 0 0 15px #ff0000;
+      letter-spacing: 3px;
+      min-height: 80px;
+    }
+
+    .digit {
+      position: relative;
+      width: 45px;
+      height: 80px;
+      margin: 0 2px;
+    }
+
+    .segment {
+      position: absolute;
+      background: #330000;
+      transition: all 0.2s ease;
+    }
+
+    .segment.active {
+      background: #ff0000;
+      box-shadow: 0 0 5px #ff0000, inset 0 0 5px #ff0000;
+    }
+
+    /* Horizontal segments */
+    .segment-a,
+    .segment-d,
+    .segment-g {
+      width: 36px;
+      height: 5px;
+      left: 4px;
+    }
+
+    .segment-a {
+      top: 2px;
+    }
+
+    .segment-d {
+      bottom: 2px;
+    }
+
+    .segment-g {
+      top: 37px;
+    }
+
+    /* Vertical segments */
+    .segment-b,
+    .segment-c,
+    .segment-e,
+    .segment-f {
+      width: 5px;
+      height: 33px;
+    }
+
+    .segment-b {
+      top: 4px;
+      right: 2px;
+    }
+
+    .segment-c {
+      bottom: 4px;
+      right: 2px;
+    }
+
+    .segment-e {
+      bottom: 4px;
+      left: 2px;
+    }
+
+    .segment-f {
+      top: 4px;
+      left: 2px;
+    }
+
+    .decimal-point {
+      width: 5px;
+      height: 5px;
+      background: #330000;
+      border-radius: 50%;
+      position: absolute;
+      right: -10px;
+      bottom: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .decimal-point.active {
+      background: #ff0000;
+      box-shadow: 0 0 5px #ff0000;
+    }
+
+    /* ปุ่มวงกลมตรงกลาง */
     .circle-button {
       width: 400px;
       height: 400px;
@@ -77,7 +210,8 @@
       border: none;
       border-radius: 50%;
       color: #fff;
-      font-size: 1.4rem; 
+      font-family: 'Prompt';
+      font-size: 1.4rem;
       font-weight: 600;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
       cursor: pointer;
@@ -85,12 +219,14 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      transition: background 0.3s, transform 0.1s;
       user-select: none;
+      transition: background-color 0.4s, transform 0.1s;
     }
+
     .circle-button:hover {
-      background-color: #555;
+      transform: scale(1.02);
     }
+
     .circle-button:active {
       transform: scale(0.98);
     }
@@ -98,9 +234,9 @@
     /* ข้อความสถานะด้านล่าง */
     .status {
       margin-top: 1rem;
-      font-size: 1.2rem; 
+      font-size: 1.2rem;
       color: #444;
-      min-height: 1.2rem; 
+      min-height: 1.2rem;
       text-align: center;
       max-width: 480px;
       width: 100%;
@@ -111,46 +247,95 @@
       .title {
         font-size: 1.6rem;
       }
-      /* ปรับปุ่มเหลือ 2 เท่าในหน้าจอเล็ก (จาก 160 -> 320) */
+
       .circle-button {
         width: 320px;
         height: 320px;
         font-size: 1.2rem;
       }
+
       .metric-label {
         font-size: 1rem;
       }
+
       .metric-value {
         font-size: 1.3rem;
+      }
+
+      .seven-segment-display {
+        font-size: 2.2rem;
+      }
+
+      .digit {
+        width: 35px;
+        height: 65px;
+      }
+
+      .segment-a,
+      .segment-d,
+      .segment-g {
+        width: 28px;
+        height: 4px;
+      }
+
+      .segment-b,
+      .segment-c,
+      .segment-e,
+      .segment-f {
+        height: 28px;
+        width: 4px;
+      }
+
+      .metrics-row {
+        gap: 0.2rem;
+      }
+
+      .metric-item.small-item {
+        min-width: 80px;
       }
     }
   </style>
 </head>
+
 <body>
 
   <!-- ส่วนแสดงข้อมูลต่างๆ ด้านบน -->
   <div class="top-info">
     <div class="title">⚠️กันโกงมิเตอร์แท็กซี่⚠️</div>
     <div class="metrics">
-      <!-- ระยะทาง -->
-      <div class="metric-item">
-        <div class="metric-label">ระยะทาง (กม.)</div>
-        <div class="metric-value" id="distance">0.00</div>
+      <!-- First row: Fare display (huge) -->
+      <div class="fare-row">
+        <div class="metric-item fare-item">
+          <div class="metric-label">ค่าโดยสารโดยประมาณ (บาท)</div>
+          <div class="seven-segment-container">
+            <div id="fareDisplay" class="seven-segment-display"></div>
+          </div>
+        </div>
       </div>
-      <!-- ความเร็ว -->
-      <div class="metric-item">
-        <div class="metric-label">ความเร็ว (กม./ชม.)</div>
-        <div class="metric-value" id="speed">0.00</div>
-      </div>
-      <!-- เวลารถติด -->
-      <div class="metric-item">
-        <div class="metric-label">รถติด (นาที)</div>
-        <div class="metric-value" id="jamTime">0.00</div>
-      </div>
-      <!-- ค่าโดยสาร -->
-      <div class="metric-item">
-        <div class="metric-label">ค่าโดยสาร (บาท)</div>
-        <div class="metric-value" id="fare">0.00</div>
+
+      <!-- Second row: Other metrics (small) -->
+      <div class="metrics-row">
+        <!-- ระยะทาง -->
+        <div class="metric-item small-item">
+          <div class="metric-label">ระยะทาง (กม.)</div>
+          <div class="metric-value" id="distance">0.00</div>
+        </div>
+        <!-- ความเร็ว -->
+        <div class="metric-item small-item">
+          <div class="metric-label">ความเร็ว (กม./ชม.)</div>
+          <div class="metric-value" id="speed">0.00</div>
+        </div>
+        <!-- เวลารถติด -->
+        <div class="metric-item small-item">
+          <div class="metric-label">รถติด (นาที)</div>
+          <div class="metric-value" id="jamTime">0.00</div>
+        </div>
+
+        <!-- เวลาเดินทางทั้งหมด -->
+        <div class="metric-item small-item">
+          <div class="metric-label">เวลาเดินทางทั้งหมด (นาที)</div>
+          <div class="metric-value" id="totalTime">0.00</div>
+        </div>
       </div>
     </div>
   </div>
@@ -161,88 +346,175 @@
   <!-- ข้อความสถานะหรือข้อผิดพลาด -->
   <div class="status" id="status"></div>
 
+  <!-- ส่วนท้ายข้อมูล -->
+  <footer style="margin-top: 2rem; font-size: 0.9rem; color: #777; text-align: center; max-width: 480px;">
+    ค่าที่แสดงเป็นเพียงค่าประมาณเบื้องต้น เพื่อใช้ประกอบการตัดสินใจเบื้องต้นเท่านั้น<br />
+    อาจมีความคลาดเคลื่อนจากสภาพการใช้งานจริง กรุณาพิจารณาและใช้วิจารณญาณเพิ่มเติมก่อนตัดสินใจ
+  </footer>
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6418968426155622"
-  crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script>
 
   <script>
+    // 7-Segment digit patterns (a, b, c, d, e, f, g)
+    const digitPatterns = {
+      '0': [1, 1, 1, 1, 1, 1, 0],
+      '1': [0, 1, 1, 0, 0, 0, 0],
+      '2': [1, 1, 0, 1, 1, 0, 1],
+      '3': [1, 1, 1, 1, 0, 0, 1],
+      '4': [0, 1, 1, 0, 0, 1, 1],
+      '5': [1, 0, 1, 1, 0, 1, 1],
+      '6': [1, 0, 1, 1, 1, 1, 1],
+      '7': [1, 1, 1, 0, 0, 0, 0],
+      '8': [1, 1, 1, 1, 1, 1, 1],
+      '9': [1, 1, 1, 1, 0, 1, 1],
+      ' ': [0, 0, 0, 0, 0, 0, 0]
+    };
+
+    function createDigit() {
+      const digit = document.createElement('div');
+      digit.className = 'digit';
+
+      const segments = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+      segments.forEach(seg => {
+        const segment = document.createElement('div');
+        segment.className = `segment segment-${seg}`;
+        digit.appendChild(segment);
+      });
+
+      // Add decimal point
+      const decimal = document.createElement('div');
+      decimal.className = 'decimal-point';
+      digit.appendChild(decimal);
+
+      return digit;
+    }
+
+    function updateDigit(digitElement, character, showDecimal = false) {
+      const pattern = digitPatterns[character] || digitPatterns[' '];
+      const segments = digitElement.querySelectorAll('.segment');
+
+      pattern.forEach((active, index) => {
+        if (active) {
+          segments[index].classList.add('active');
+        } else {
+          segments[index].classList.remove('active');
+        }
+      });
+
+      const decimal = digitElement.querySelector('.decimal-point');
+      if (showDecimal) {
+        decimal.classList.add('active');
+      } else {
+        decimal.classList.remove('active');
+      }
+    }
+
+    function updateSevenSegmentDisplay(value) {
+      const fareDisplay = document.getElementById('fareDisplay');
+
+      // Round up to 2 decimal places
+      const roundedValue = Math.ceil(value * 100) / 100;
+
+      // Format to show exactly 2 decimal places
+      let displayText = roundedValue.toFixed(2);
+
+      // Pad with spaces if needed (for consistent 6 digits: XXX.XX)
+      if (displayText.length < 6) {
+        displayText = displayText.padStart(6, ' ');
+      }
+
+      // Clear existing digits
+      fareDisplay.innerHTML = '';
+
+      // Create digits
+      for (let i = 0; i < displayText.length; i++) {
+        const char = displayText[i];
+        if (char === '.') continue; // Skip decimal point character
+
+        const digitElement = createDigit();
+        const showDecimal = i < displayText.length - 1 && displayText[i + 1] === '.';
+        updateDigit(digitElement, char, showDecimal);
+        fareDisplay.appendChild(digitElement);
+      }
+    }
+
+    // --------------------------------------------
+    // ฟังก์ชันตรวจสอบเบราว์เซอร์ (Chrome หรือ Edge)
+    // --------------------------------------------
+    function checkBrowser() {
+      const userAgent = navigator.userAgent;
+      if (userAgent.indexOf("Chrome") === -1 && userAgent.indexOf("Edg") === -1) {
+        alert("ไซต์นี้รองรับเฉพาะ Chrome หรือ Edge นะจ๊ะ");
+      }
+    }
+
     // --------------------------------------------
     // ตัวแปรที่ใช้ควบคุมสถานะ
     // --------------------------------------------
     let watchID = null;
     let previousPosition = null;
     let lastTimestamp = null;
-    let totalDistance = 0.0; // กม.
-    let totalJamTime = 0.0;  // นาที
-    let currentFare = 0.0;   // บาท
-    let currentSpeed = 0.0;  // กม./ชม.
+    let totalDistance = 0.0;
+    let totalJamTime = 0.0;
+    let currentFare = 35.0;
+    let currentSpeed = 0.0;
+    let totalTime = 0.0;
 
-    // กำหนด Threshold ความเร็ว (ถ้าต่ำกว่านี้ ถือว่ารถติด)
     const TRAFFIC_SPEED_THRESHOLD = 6.0;
-
-    // สถานะ Meter: 'STOPPED', 'RUNNING', 'PAUSED'
+    const DISTANCE_THRESHOLD = 0.00005;
     let meterState = 'STOPPED';
-
-    // สำหรับตรวจจับการกดค้าง
     let pressTimer = null;
-    const LONG_PRESS_DURATION = 600; // ms
+    const LONG_PRESS_DURATION = 600;
 
     // --------------------------------------------
     // ฟังก์ชันคำนวณค่าแท็กซี่โดยคร่าว ๆ
     // --------------------------------------------
     function computeThaiTaxiFare(distanceKm, jamMinutes) {
-      let fare = 35; // เริ่มต้นที่ 35
+      let fare = 30;
       let remain = distanceKm;
 
-      // หักไป 1 กม. แรก (35 บาท)
       if (remain <= 1) {
         remain = 0;
       } else {
         remain -= 1;
       }
 
-      // 1-10 กม. => 5.50 บาท/กม.
       if (remain > 0) {
         let segment = Math.min(remain, 9);
         fare += segment * 5.50;
         remain -= segment;
       }
 
-      // 10-20 กม. => 6.50 บาท/กม.
       if (remain > 0) {
         let segment = Math.min(remain, 10);
         fare += segment * 6.50;
         remain -= segment;
       }
 
-      // 20-40 กม. => 7.50 บาท/กม.
       if (remain > 0) {
         let segment = Math.min(remain, 20);
         fare += segment * 7.50;
         remain -= segment;
       }
 
-      // 40-60 กม. => 8.00 บาท/กม.
       if (remain > 0) {
         let segment = Math.min(remain, 20);
         fare += segment * 8.00;
         remain -= segment;
       }
 
-      // 60-80 กม. => 9.00 บาท/กม.
       if (remain > 0) {
         let segment = Math.min(remain, 20);
         fare += segment * 9.00;
         remain -= segment;
       }
 
-      // เกิน 80 กม. => 10.50 บาท/กม.
       if (remain > 0) {
         fare += remain * 10.50;
       }
 
-      // รถติด => 1.25 บาท/นาที
       fare += jamMinutes * 1.25;
-
       return fare;
     }
 
@@ -253,14 +525,29 @@
       return (value * Math.PI) / 180;
     }
     function haversineDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // รัศมีโลก (km)
+      const R = 6371;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
       const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
+    }
+
+    // --------------------------------------------
+    // อัปเดตสีปุ่ม
+    // --------------------------------------------
+    function updateButtonColor(state) {
+      const button = document.getElementById('meterButton');
+      const colors = {
+        STOPPED: '#B1C29E',
+        RUNNING: '#FADA7A',
+        PAUSED: '#C1BAA1',
+      };
+
+      button.style.backgroundColor = colors[state];
+      button.style.color = '#333';
     }
 
     // --------------------------------------------
@@ -273,18 +560,29 @@
       const currentTimestamp = pos.timestamp;
 
       if (previousPosition && lastTimestamp) {
-        const dist = haversineDistance(
+        let dist = haversineDistance(
           previousPosition.lat,
           previousPosition.lon,
           latitude,
           longitude
         );
+
+        if (dist < DISTANCE_THRESHOLD) {
+          dist = 0;
+        }
+
         totalDistance += dist;
 
         const timeDiffMs = currentTimestamp - lastTimestamp;
         const timeDiffMin = timeDiffMs / 60000.0;
 
-        currentSpeed = dist / (timeDiffMin / 60);
+        totalTime += timeDiffMin;
+
+        if (dist === 0) {
+          currentSpeed = 0;
+        } else {
+          currentSpeed = dist / (timeDiffMin / 60);
+        }
 
         if (currentSpeed < TRAFFIC_SPEED_THRESHOLD) {
           totalJamTime += timeDiffMin;
@@ -312,7 +610,10 @@
       document.getElementById('distance').textContent = totalDistance.toFixed(2);
       document.getElementById('speed').textContent = currentSpeed.toFixed(2);
       document.getElementById('jamTime').textContent = totalJamTime.toFixed(2);
-      document.getElementById('fare').textContent = currentFare.toFixed(2);
+      document.getElementById('totalTime').textContent = totalTime.toFixed(2);
+
+      // Update 7-segment display with real-time fare
+      updateSevenSegmentDisplay(currentFare);
     }
 
     // --------------------------------------------
@@ -322,14 +623,16 @@
       totalDistance = 0.0;
       totalJamTime = 0.0;
       currentSpeed = 0.0;
-      currentFare = 35.0;
+      currentFare = 30.0;
+      totalTime = 0.0;
       previousPosition = null;
       lastTimestamp = null;
       updateDisplay();
 
-      document.getElementById('status').textContent = "เริ่มวัดระยะแล้ว...";
       meterState = 'RUNNING';
+      updateButtonColor(meterState);
 
+      document.getElementById('status').textContent = "เริ่มวัดระยะแล้ว...";
       watchID = navigator.geolocation.watchPosition(
         handlePosition,
         handleError,
@@ -342,6 +645,7 @@
     // --------------------------------------------
     function pauseMeter() {
       meterState = 'PAUSED';
+      updateButtonColor(meterState);
       document.getElementById('status').textContent = "หยุดชั่วคราวนะ";
     }
 
@@ -354,6 +658,7 @@
         watchID = null;
       }
       meterState = 'STOPPED';
+      updateButtonColor(meterState);
       document.getElementById('status').textContent = "หยุดแล้วจ้า";
     }
 
@@ -362,6 +667,11 @@
     // --------------------------------------------
     function resetMeter() {
       stopMeter();
+      currentFare = 30.0;
+      totalDistance = 0.0;
+      totalJamTime = 0.0;
+      currentSpeed = 0.0;
+      totalTime = 0.0;
       document.getElementById('meterButton').textContent = "เริ่ม";
       document.getElementById('status').textContent = "รีเซ็ตเรียบร้อยจ้า คลิกเพื่อเริ่มใหม่";
       updateDisplay();
@@ -373,7 +683,6 @@
     const meterButton = document.getElementById('meterButton');
 
     meterButton.addEventListener('mousedown', () => {
-      // ตั้งเวลาไว้ ถ้ากดค้างเกิน LONG_PRESS_DURATION => stopMeter()
       pressTimer = setTimeout(() => {
         if (meterState === 'RUNNING' || meterState === 'PAUSED') {
           stopMeter();
@@ -392,13 +701,14 @@
           startMeter();
           meterButton.textContent = "หยุดชั่วคราว";
         }
-      } 
+      }
       else if (meterState === 'RUNNING') {
         pauseMeter();
         meterButton.textContent = "เริ่มต่อ";
       }
       else if (meterState === 'PAUSED') {
         meterState = 'RUNNING';
+        updateButtonColor(meterState);
         document.getElementById('status').textContent = "วิ่งต่อแล้วนะ";
         meterButton.textContent = "หยุดชั่วคราว";
       }
@@ -409,8 +719,14 @@
     });
 
     window.addEventListener('load', () => {
+      checkBrowser();
+
       if (!('geolocation' in navigator)) {
         alert("บราวเซอร์ไม่ซัพพอร์ต geolocation จ้า");
+      } else {
+        updateButtonColor('STOPPED');
+        // Initialize 7-segment display with starting fare
+        updateSevenSegmentDisplay(30.0);
       }
     });
   </script>
